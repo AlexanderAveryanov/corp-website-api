@@ -1,0 +1,52 @@
+package com.corp_website_api.backend.controller;
+
+import com.corp_website_api.backend.dto.CreateContactRequest;
+import com.corp_website_api.backend.entity.ContactRequest;
+import com.corp_website_api.backend.service.ContactRequestService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+// = @Controller + @ResponseBody
+// Помечаем класс как контроллер, все методы возвращают данные (не HTML страницы)
+// Автоматически преобразует объекты в JSON
+@RestController
+@RequestMapping("api/contact-requests") // Задает базовый путь для всех методов контроллера
+public class ContactRequestController {
+
+    @Autowired
+    private ContactRequestService service;
+
+    // Создание новой заявки
+    @PostMapping // обработка POST запросов
+    public ResponseEntity<ContactRequest> createRequest(
+            @Valid // включение валидации DTO (ДО передачи в сервис, возвращает 400 при ошибке)
+            @RequestBody // тело запроса → объект Java
+            CreateContactRequest requestDto) {
+
+        // Преобразование DTO → Entity
+        ContactRequest request = new ContactRequest();
+        request.setName(requestDto.getName());
+        request.setEmail(requestDto.getEmail());
+        request.setPhone(requestDto.getPhone());
+        request.setMessage(requestDto.getMessage());
+
+        ContactRequest savedRequest = service.createRequest(request);
+        return ResponseEntity.ok(savedRequest);
+    }
+
+    // Получение всех заявок
+    @GetMapping
+    public List<ContactRequest> getAllRequests() {
+        return service.getAllRequests();
+    }
+
+    // Получение заявки по id
+    @GetMapping("/{id}") // путь с переменной
+    public ContactRequest getRequest(@PathVariable Long id) { // @PathVariable извлечение id из URL
+        return service.getRequestById(id);
+    }
+}
