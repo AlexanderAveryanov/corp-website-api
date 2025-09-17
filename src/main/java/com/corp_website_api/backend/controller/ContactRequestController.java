@@ -1,5 +1,6 @@
 package com.corp_website_api.backend.controller;
 
+import com.corp_website_api.backend.dto.ContactRequestResponse;
 import com.corp_website_api.backend.dto.CreateContactRequest;
 import com.corp_website_api.backend.entity.ContactRequest;
 import com.corp_website_api.backend.service.ContactRequestService;
@@ -23,31 +24,24 @@ public class ContactRequestController {
 
     // Создание новой заявки
     @PostMapping // обработка POST запросов
-    public ResponseEntity<ContactRequest> createRequest(
+    public ResponseEntity<ContactRequestResponse> createRequest(
             @Valid // включение валидации DTO (ДО передачи в сервис, возвращает 400 при ошибке)
             @RequestBody // тело запроса → объект Java
             CreateContactRequest requestDto) {
 
-        // Преобразование DTO → Entity
-        ContactRequest request = new ContactRequest();
-        request.setName(requestDto.getName());
-        request.setEmail(requestDto.getEmail());
-        request.setPhone(requestDto.getPhone());
-        request.setMessage(requestDto.getMessage());
-
-        ContactRequest savedRequest = service.createRequest(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRequest);
+        ContactRequestResponse response = service.createRequest(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // Получение всех заявок
     @GetMapping
-    public List<ContactRequest> getAllRequests() {
+    public List<ContactRequestResponse> getAllRequests() {
         return service.getAllRequests();
     }
 
     // Получение заявки по id
     @GetMapping("/{id}") // путь с переменной
-    public ResponseEntity<ContactRequest> getRequest(@PathVariable Long id) { // @PathVariable извлечение id из URL
+    public ResponseEntity<ContactRequestResponse> getRequest(@PathVariable Long id) { // @PathVariable извлечение id из URL
         return service.getRequestById(id)
                 .map(ResponseEntity::ok) // 200 OK если найден
                 .orElse(ResponseEntity.notFound().build()); // 404 если не найден
