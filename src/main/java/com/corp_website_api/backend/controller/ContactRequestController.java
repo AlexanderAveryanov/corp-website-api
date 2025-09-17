@@ -5,6 +5,7 @@ import com.corp_website_api.backend.entity.ContactRequest;
 import com.corp_website_api.backend.service.ContactRequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,7 @@ public class ContactRequestController {
         request.setMessage(requestDto.getMessage());
 
         ContactRequest savedRequest = service.createRequest(request);
-        return ResponseEntity.ok(savedRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRequest);
     }
 
     // Получение всех заявок
