@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 // Cервис слой для бизнес-логики
 // Эта аннотация делает класс Spring-сервисом
@@ -24,9 +25,8 @@ public class ContactRequestService {
         return repository.findAll();
     }
 
-    public ContactRequest getRequestById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
+    public Optional<ContactRequest> getRequestById(Long id) {
+        return repository.findById(id);
     }
 
 //    public ContactRequest updateRequestStatus(Long id, String status) {

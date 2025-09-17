@@ -47,7 +47,9 @@ public class ContactRequestController {
 
     // Получение заявки по id
     @GetMapping("/{id}") // путь с переменной
-    public ContactRequest getRequest(@PathVariable Long id) { // @PathVariable извлечение id из URL
-        return service.getRequestById(id);
+    public ResponseEntity<ContactRequest> getRequest(@PathVariable Long id) { // @PathVariable извлечение id из URL
+        return service.getRequestById(id)
+                .map(ResponseEntity::ok) // 200 OK если найден
+                .orElse(ResponseEntity.notFound().build()); // 404 если не найден
     }
 }
