@@ -2,7 +2,6 @@ package com.corp_website_api.backend.controller;
 
 import com.corp_website_api.backend.dto.ContactRequestResponse;
 import com.corp_website_api.backend.dto.CreateContactRequest;
-import com.corp_website_api.backend.entity.ContactRequest;
 import com.corp_website_api.backend.service.ContactRequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,7 @@ import java.util.List;
 @RequestMapping("api/contact-requests") // Задает базовый путь для всех методов контроллера
 public class ContactRequestController {
 
-    @Autowired
+    @Autowired // Получает экземпляр сервиса из Spring-контейнера
     private ContactRequestService service;
 
     // Создание новой заявки

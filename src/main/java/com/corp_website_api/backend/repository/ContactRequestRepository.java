@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository // Помечает интерфейс как репозиторий
 // Интерфейс наследуем от JpaRepository и передаем как параметры тип сущности и тип первичного ключа
+// Регистрирует класс в Spring-контейнере, позволяет использовать @Autowired в других классах, чтобы получить экземпляр этого сервиса из контейнера
 public interface ContactRequestRepository extends JpaRepository<ContactRequest, Long> {
     // Spring Data JPA автоматически создаст CRUD методы
 }
