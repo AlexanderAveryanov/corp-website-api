@@ -3,6 +3,9 @@ package com.corp_website_api.backend.service;
 import com.corp_website_api.backend.dto.ContactRequestResponse;
 import com.corp_website_api.backend.dto.CreateContactRequest;
 import com.corp_website_api.backend.entity.ContactRequest;
+import com.corp_website_api.backend.entity.RequestStatus;
+import com.corp_website_api.backend.exception.InvalidStatusException;
+import com.corp_website_api.backend.exception.NotFoundException;
 import com.corp_website_api.backend.repository.ContactRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,28 +24,29 @@ public class ContactRequestService {
     private ContactRequestRepository repository;
 
     private ContactRequestResponse convertToResponse(ContactRequest entity) {
-        ContactRequestResponse response = new ContactRequestResponse();
-        response.setId(entity.getId());
-        response.setName(entity.getName());
-        response.setEmail(entity.getEmail());
-        response.setPhone(entity.getPhone());
-        response.setMessage(entity.getMessage());
-        response.setStatus(entity.getStatus());
-        response.setCreatedAt(entity.getCreatedAt());
-        return response;
+        ContactRequestResponse ropResponse = new ContactRequestResponse();
+        ropResponse.setId(entity.getId());
+        ropResponse.setName(entity.getName());
+        ropResponse.setEmail(entity.getEmail());
+        ropResponse.setPhone(entity.getPhone());
+        ropResponse.setMessage(entity.getMessage());
+        ropResponse.setStatus(entity.getStatus());
+        ropResponse.setCreatedAt(entity.getCreatedAt());
+        return ropResponse;
     }
 
     public ContactRequestResponse createRequest(CreateContactRequest requestDto) {
-        ContactRequest request = new ContactRequest();
-        request.setName(requestDto.getName());
-        request.setEmail(requestDto.getEmail());
-        request.setPhone(requestDto.getPhone());
-        request.setMessage(requestDto.getMessage());
+        ContactRequest ropRequest = new ContactRequest();
+        ropRequest.setName(requestDto.getName());
+        ropRequest.setEmail(requestDto.getEmail());
+        ropRequest.setPhone(requestDto.getPhone());
+        ropRequest.setMessage(requestDto.getMessage());
 
-        ContactRequest saved = repository.save(request);
+        ContactRequest saved = repository.save(ropRequest);
         return convertToResponse(saved); // Возвращаем DTO, а не Entity
     }
 
+    // Возвращает все заявки
     public List<ContactRequestResponse> getAllRequests() {
         return repository.findAll()
                 .stream()
@@ -55,8 +59,21 @@ public class ContactRequestService {
                 .map(this::convertToResponse); // Конвертируем если найдено
     }
 
-//    public ContactRequest updateRequestStatus(Long id, String status) {
-//        ContactRequest request = getRequestById(id);
-//        request.setStatus(ContactRequest.RequestStatus.valueOf(status.toUpperCase()));
-//    }
+    // Обновление статуса заявки
+    public ContactRequestResponse updateRequestStatus(Long id, String status) {
+        ContactRequest ropRequest = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Заявка не найдена"));
+
+        // Преобразуем строку в enum
+        RequestStatus newStatus;
+        try {
+            newStatus = RequestStatus.valueOf(status.toUpperCase()); // valueOf() - ищет константу enum с таким именем
+        } catch (IllegalArgumentException e) { // Обработка исключения, которое бросает valueOf()
+            throw new InvalidStatusException("Некорректный статус: " + status); // Бросаем более понятное исключение
+        }
+
+        ropRequest.setStatus(newStatus);
+        ContactRequest ropUpdated = repository.save(ropRequest);
+        return convertToResponse(ropUpdated);
+    }
 }

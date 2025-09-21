@@ -2,6 +2,7 @@ package com.corp_website_api.backend.controller;
 
 import com.corp_website_api.backend.dto.ContactRequestResponse;
 import com.corp_website_api.backend.dto.CreateContactRequest;
+import com.corp_website_api.backend.dto.UpdateStatusRequest;
 import com.corp_website_api.backend.service.ContactRequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,4 +46,13 @@ public class ContactRequestController {
                 .map(ResponseEntity::ok) // 200 OK если найден
                 .orElse(ResponseEntity.notFound().build()); // 404 если не найден
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ContactRequestResponse> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateStatusRequest statusRequest) {
+        ContactRequestResponse response = service.updateRequestStatus(id, statusRequest.getStatus());
+        return ResponseEntity.ok(response);
+    }
+
 }

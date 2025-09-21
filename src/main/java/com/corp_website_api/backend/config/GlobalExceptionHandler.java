@@ -1,5 +1,9 @@
 package com.corp_website_api.backend.config;
 
+import com.corp_website_api.backend.dto.ErrorResponse;
+import com.corp_website_api.backend.exception.InvalidStatusException;
+import com.corp_website_api.backend.exception.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,5 +40,16 @@ public class GlobalExceptionHandler {
         // Здесь badRequest() - означает, что надо вернуть HTTP 400
         // body() - передаем ошибки в теле ответа
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFound(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage()); // возвращаем 404 + текст ошибки
+    }
+
+    @ExceptionHandler(InvalidStatusException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidStatus(InvalidStatusException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), "INVALID_STATUS");
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 }
