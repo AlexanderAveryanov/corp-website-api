@@ -55,4 +55,25 @@ public class ContactRequestController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping(params = "email")
+    public List<ContactRequestResponse> getRequestsByEmail(@RequestParam String email) { // @RequestParam извлечение параметра из URL
+        return service.findByEmail(email);
+    }
+
+    @GetMapping(params = "status")
+    public List<ContactRequestResponse> getRequestsByStatus(@RequestParam String status) {
+        return service.findByStatus(status);
+    }
+
+    @GetMapping(params = {"email", "status"})
+    public List<ContactRequestResponse> getRequestsByEmailAndStatus(
+            @RequestParam String email,
+            @RequestParam String status) {
+        return service.findByEmailAndStatus(email, status);
+    }
+
+    @GetMapping(params = "createdAfter")
+    public List<ContactRequestResponse> getRequestsByCreatedAtAfter(@RequestParam String createdAfter) {
+        return service.findByCreatedAtAfter(createdAfter);
+    }
 }

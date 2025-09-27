@@ -10,6 +10,9 @@ import com.corp_website_api.backend.repository.ContactRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +26,7 @@ public class ContactRequestService {
     @Autowired // Автоматически внедряет репозиторий
     private ContactRequestRepository repository;
 
+    // Конвертирует Entity в DTO
     private ContactRequestResponse convertToResponse(ContactRequest entity) {
         ContactRequestResponse ropResponse = new ContactRequestResponse();
         ropResponse.setId(entity.getId());
@@ -75,5 +79,71 @@ public class ContactRequestService {
         ropRequest.setStatus(newStatus);
         ContactRequest ropUpdated = repository.save(ropRequest);
         return convertToResponse(ropUpdated);
+    }
+
+    // Поиск заявок по email
+    public List<ContactRequestResponse> findByEmail(String email) {
+        return repository.findByEmail(email)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList()); // collect - преобразует поток в коллекцию
+    }
+
+    // Поиск заявок по статусу
+    public List<ContactRequestResponse> findByStatus(String status) {
+        RequestStatus requestStatus;
+        try {
+            requestStatus = RequestStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidStatusException("Некорректный статус: " + status);
+        }
+
+        return repository.findByStatus(requestStatus)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Поиск заявок по email и статусу
+    public List<ContactRequestResponse> findByEmailAndStatus(String email, String status) {
+        RequestStatus requestStatus;
+        try {
+            requestStatus = RequestStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidStatusException("Некорректный статус: " + status);
+        }
+
+        // findByEmailAndStatus - метод репозитория автогенерируется Spring Data JPA на остове названия метода
+        // Он разбирает название метода и понимает, что это метод find (поиска) с параметрами email и status
+        // и строит один sql запрос к БД с использованием этих параметров
+        return repository.findByEmailAndStatus(email, requestStatus)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Парсинг даты в LocalDateTime
+    private LocalDateTime parseDateTime(String dateString) {
+        try {
+            // Пробуем разные форматы
+            return LocalDateTime.parse(dateString); // ISO format: 2023-10-25T10:30:00
+        } catch (DateTimeParseException e) {
+            try {
+                // Формат только даты: 2023-10-25 (начинаем с 00:00 этого дня)
+                LocalDate localDate = LocalDate.parse(dateString);
+                return localDate.atStartOfDay(); // Преобразуем в LocalDateTime с 00:00
+            } catch (DateTimeParseException e2) {
+                throw new IllegalArgumentException("Некорректный формат даты. Используйте: YYYY-MM-DD или YYYY-MM-DDTHH:MM:SS");
+            }
+        }
+    }
+
+    // Поиск заявок по дате создания запроса после указанной даты
+    public List<ContactRequestResponse> findByCreatedAtAfter(String dateString) {
+        LocalDateTime date = parseDateTime(dateString);
+        return repository.findByCreatedAtAfter(date)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 }
